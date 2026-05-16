@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CineVault — Cartelera</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--sur:#13131e;--sur2:#1c1c2e;
+  --gold:#e8b04b;--ora:#ff6b35;
+  --txt:#eaeaea;--mut:#7a7a99;--r:12px;
+  --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--txt);font-family:var(--fb);min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:1.5rem;
+  padding:.85rem 2rem;background:rgba(10,10,15,.97);
+  border-bottom:1px solid rgba(232,176,75,.12)}
+.logo{display:flex;align-items:center;gap:.45rem;font-family:var(--fd);font-size:1.85rem;letter-spacing:2px}
+.logo span{color:var(--gold)}
+.logo em{color:var(--gold);font-style:normal}
+.tag{font-size:.67rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);
+  border-left:2px solid var(--gold);padding-left:.7rem}
+
+/* SEARCH */
+.sw{padding:1.2rem 2rem .4rem;max-width:1400px;margin:0 auto;
+  display:flex;gap:.7rem;align-items:center;flex-wrap:wrap}
+.si{flex:1;min-width:160px;padding:.52rem 1rem;background:var(--sur);
+  border:1px solid rgba(232,176,75,.2);border-radius:8px;color:var(--txt);
+  font-family:var(--fb);font-size:.88rem;outline:none;transition:border-color .3s}
+.si::placeholder{color:var(--mut)}
+.si:focus{border-color:var(--gold)}
+.fs{padding:.48rem .8rem;background:var(--sur);border:1px solid rgba(232,176,75,.2);
+  border-radius:8px;color:var(--txt);font-family:var(--fb);font-size:.82rem;outline:none;cursor:pointer}
+.cnt{font-size:.74rem;color:var(--mut);letter-spacing:.05em}
+
+/* LOADER */
+#ldr{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1.8rem;background:var(--bg);
+  transition:opacity .5s,visibility .5s}
+#ldr.off{opacity:0;visibility:hidden;pointer-events:none}
+.film{display:flex;gap:5px}
+.film b{display:block;width:14px;height:48px;background:var(--sur2);border-radius:3px;
+  animation:fp 1.1s ease-in-out infinite}
+.film b:nth-child(1){animation-delay:0s}.film b:nth-child(2){animation-delay:.15s}
+.film b:nth-child(3){animation-delay:.3s}.film b:nth-child(4){animation-delay:.45s}
+.film b:nth-child(5){animation-delay:.6s}
+@keyframes fp{0%,100%{background:var(--sur2);transform:scaleY(1)}50%{background:var(--gold);transform:scaleY(1.35)}}
+.ltx{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);animation:bl 2s ease infinite}
+@keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* STATES */
+.st{display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:.9rem;min-height:50vh;text-align:center;padding:2rem}
+.st.on{display:flex}
+.si2{font-size:3rem}
+.st h2{font-family:var(--fd);font-size:1.85rem;letter-spacing:.05em}
+.st p{color:var(--mut);font-size:.88rem}
+.st button{margin-top:.4rem;padding:.52rem 1.5rem;background:var(--gold);color:#000;
+  border:none;border-radius:6px;font-family:var(--fb);font-weight:500;cursor:pointer;transition:opacity .3s}
+.st button:hover{opacity:.8}
+
+/* GRID */
+#grd{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:1.3rem;padding:1.2rem 2rem 3rem;max-width:1400px;margin:0 auto}
+
+/* CARD */
+.card{position:relative;border-radius:var(--r);overflow:hidden;cursor:pointer;
+  background:var(--sur);box-shadow:0 4px 18px rgba(0,0,0,.4);
+  opacity:0;transform:translateY(24px);animation:ci .5s ease forwards;
+  transition:transform .35s cubic-bezier(.4,0,.2,1),box-shadow .35s}
+.card:hover{transform:translateY(-6px) scale(1.025);
+  box-shadow:0 14px 36px rgba(232,176,75,.2),0 4px 10px rgba(0,0,0,.5);z-index:2}
+@keyframes ci{to{opacity:1;transform:translateY(0)}}
+.ci{position:relative;width:100%;aspect-ratio:2/3;overflow:hidden;background:var(--sur2)}
+.ci img{width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .6s cubic-bezier(.2,0,.1,1)}
+.card:hover .ci img{transform:scale(1.07)}
+.cov{position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(10,10,15,.95) 0%,transparent 55%);
+  display:flex;flex-direction:column;justify-content:flex-end;padding:.85rem;
+  opacity:0;transition:opacity .35s}
+.card:hover .cov{opacity:1}
+.cbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.36rem .78rem;
+  background:var(--gold);color:#000;border-radius:4px;font-size:.66rem;
+  font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.bgn{position:absolute;top:.62rem;left:.62rem;background:rgba(0,0,0,.68);
+  border:1px solid rgba(232,176,75,.3);color:var(--gold);font-size:.56rem;
+  font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.19rem .46rem;border-radius:3px}
+.cbd{padding:.75rem .9rem}
+.ctit{font-family:var(--fd);font-size:1.06rem;letter-spacing:.04em;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmet{margin-top:.28rem;display:flex;align-items:center;gap:.45rem}
+.cyr{font-size:.67rem;color:var(--mut);letter-spacing:.07em}
+.cloc{font-size:.61rem;color:var(--ora);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* MODAL */
+#mb{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);
+  display:none;align-items:center;justify-content:center;padding:1.5rem}
+#mb.on{display:flex}
+.mdl{position:relative;background:var(--sur);border-radius:16px;overflow:hidden;
+  max-width:800px;width:100%;max-height:88vh;overflow-y:auto;
+  display:grid;grid-template-columns:250px 1fr;
+  box-shadow:0 28px 70px rgba(0,0,0,.8);
+  scrollbar-width:thin;scrollbar-color:var(--sur2) transparent}
+.mcl{position:absolute;top:.85rem;right:.85rem;z-index:10;width:30px;height:30px;
+  background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.14);
+  color:var(--txt);border-radius:50%;font-size:.78rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .3s,transform .3s}
+.mcl:hover{background:var(--ora);transform:rotate(90deg)}
+.mps{position:relative}
+.mps img{width:100%;height:100%;object-fit:cover;display:block;min-height:340px}
+.mgr{position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,var(--sur))}
+.mbd{padding:1.8rem 1.5rem 1.8rem .8rem;display:flex;flex-direction:column;gap:.85rem}
+.mtit{font-family:var(--fd);font-size:2rem;letter-spacing:.04em;line-height:1.1}
+.mtgs{display:flex;gap:.4rem;flex-wrap:wrap}
+.mtg{padding:.21rem .56rem;border-radius:4px;font-size:.63rem;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase}
+.tg{background:rgba(232,176,75,.12);color:var(--gold);border:1px solid rgba(232,176,75,.25)}
+.ty{background:rgba(255,107,53,.1);color:var(--ora);border:1px solid rgba(255,107,53,.2)}
+.tl{background:rgba(255,255,255,.06);color:var(--mut);border:1px solid rgba(255,255,255,.1)}
+.msc h3{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);
+  margin-bottom:.4rem;padding-bottom:.3rem;border-bottom:1px solid rgba(255,255,255,.07)}
+.msc p{font-size:.86rem;line-height:1.73;color:#c5c5d9}
+
+@media(max-width:580px){
+  #grd{padding:1rem;gap:.85rem}
+  .mdl{grid-template-columns:1fr}
+  .mps img{min-height:190px;max-height:230px}
+  .mgr{background:linear-gradient(to top,var(--sur) 10%,transparent)}
+  .mbd{padding:1.1rem}.mtit{font-size:1.5rem}
+  .tag,.sw{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo"><span>▶</span> CINE<em>VAULT</em></div>
+  <p class="tag">En cartelera ahora</p>
+</header>
+
+<div class="sw">
+  <input class="si" id="sQ" type="text" placeholder="Buscar película…"/>
+  <select class="fs" id="sG"><option value="">Todos los géneros</option></select>
+  <select class="fs" id="sL"><option value="">Todas las salas</option></select>
+  <span class="cnt" id="cnt"></span>
+</div>
+
+<div id="ldr">
+  <div class="film"><b></b><b></b><b></b><b></b><b></b></div>
+  <p class="ltx">Cargando cartelera…</p>
+</div>
+
+<div class="st" id="err">
+  <div class="si2">📽️</div>
+  <h2>No se pudo cargar la cartelera</h2>
+  <p>Verifica tu conexión o intenta más tarde.</p>
+  <button onclick="load()">Reintentar</button>
+</div>
+
+<div class="st" id="emp">
+  <div class="si2">🎬</div>
+  <h2>Sin resultados</h2>
+  <p>Intenta con otro filtro o búsqueda.</p>
+</div>
+
+<main id="grd"></main>
+
+<div id="mb">
+  <div class="mdl">
+    <button class="mcl" id="mcl">✕</button>
+    <div class="mps">
+      <img id="mImg" src="" alt=""/>
+      <div class="mgr"></div>
+    </div>
+    <div class="mbd">
+      <h2 class="mtit" id="mTit"></h2>
+      <div class="mtgs" id="mTgs"></div>
+      <div class="msc"><h3>Sinopsis</h3><p id="mDsc"></p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://52.171.58.51:8080/api/cartelera';
+let all = [];
+
+const ldr = document.getElementById('ldr');
+const grd = document.getElementById('grd');
+const err = document.getElementById('err');
+const emp = document.getElementById('emp');
+const mb  = document.getElementById('mb');
+const sQ  = document.getElementById('sQ');
+const sG  = document.getElementById('sG');
+const sL  = document.getElementById('sL');
+const cnt = document.getElementById('cnt');
+
+function img(u){ return u&&u.startsWith('http')?u:'https://placehold.co/300x450/1c1c2e/7a7a99?text=Sin+imagen'; }
+
+async function load(){
+  ldr.classList.remove('off');
+  err.classList.remove('on');
+  emp.classList.remove('on');
+  grd.innerHTML='';
+  try{
+    const r = await fetch(API, {mode:'cors'});
+    if(!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    all = Array.isArray(d)?d:(d.data??d.movies??d.peliculas??[]);
+    // Poblar filtros
+    [...new Set(all.map(m=>m.Type).filter(Boolean))].sort()
+      .forEach(v=>{ const o=document.createElement('option');o.value=o.textContent=v;sG.appendChild(o); });
+    [...new Set(all.map(m=>m.Ubication).filter(Boolean))].sort()
+      .forEach(v=>{ const o=document.createElement('option');o.value=o.textContent=v;sL.appendChild(o); });
+    render();
+  }catch(e){
+    console.error(e);
+    err.classList.add('on');
+  }finally{
+    ldr.classList.add('off');
+  }
+}
+
+function render(){
+  const q=sQ.value.toLowerCase().trim(), g=sG.value, l=sL.value;
+  const f=all.filter(m=>{
+    const t=(m.Title||'').toLowerCase(), ds=(m.description||'').toLowerCase();
+    return(!q||t.includes(q)||ds.includes(q))&&(!g||m.Type===g)&&(!l||m.Ubication===l);
+  });
+  grd.innerHTML='';
+  cnt.textContent=f.length+' película'+(f.length!==1?'s':'');
+  if(!f.length){ emp.classList.add('on'); return; }
+  emp.classList.remove('on');
+  f.forEach((m,i)=>{
+    const c=document.createElement('article');
+    c.className='card';
+    c.style.animationDelay=(i*42)+'ms';
+    c.innerHTML=`
+      <div class="ci">
+        <img src="${img(m.Poster)}" alt="${m.Title||''}" loading="lazy"
+          onerror="this.src='https://placehold.co/300x450/1c1c2e/7a7a99?text=Sin+imagen'"/>
+        <div class="cov"><span class="cbtn">▶ Ver detalles</span></div>
+      </div>
+      ${m.Type?`<span class="bgn">${m.Type}</span>`:''}
+      <div class="cbd">
+        <p class="ctit" title="${m.Title||''}">${m.Title||'Sin título'}</p>
+        <div class="cmet">
+          ${m.Year?`<span class="cyr">${m.Year}</span>`:''}
+          ${m.Ubication?`<span class="cloc">📍 ${m.Ubication}</span>`:''}
+        </div>
+      </div>`;
+    c.addEventListener('click',()=>modal(m));
+    grd.appendChild(c);
+  });
+}
+
+function modal(m){
+  document.getElementById('mImg').src=img(m.Poster);
+  document.getElementById('mImg').alt=m.Title||'';
+  document.getElementById('mTit').textContent=m.Title||'Sin título';
+  document.getElementById('mDsc').textContent=m.description||'Sin descripción disponible.';
+  const tgs=document.getElementById('mTgs');
+  tgs.innerHTML='';
+  if(m.Type)      tgs.innerHTML+=`<span class="mtg tg">${m.Type}</span>`;
+  if(m.Year)      tgs.innerHTML+=`<span class="mtg ty">${m.Year}</span>`;
+  if(m.Ubication) tgs.innerHTML+=`<span class="mtg tl">📍 ${m.Ubication}</span>`;
+  mb.classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function close(){ mb.classList.remove('on'); document.body.style.overflow=''; }
+
+document.getElementById('mcl').onclick=close;
+mb.onclick=e=>{ if(e.target===mb) close(); };
+document.onkeydown=e=>{ if(e.key==='Escape') close(); };
+sQ.oninput=render; sG.onchange=render; sL.onchange=render;
+
+load();
+</script>
+</body>
+</html>
